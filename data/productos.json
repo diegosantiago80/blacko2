@@ -1,0 +1,55 @@
+[
+  {
+    "id": "3d41944d-35e9-4f7d-a10f-81c8fe48c3e2",
+    "title": "Camiseta Negra",
+    "description": "Camiseta de algodón 100% negra con estampado.",
+    "code": "CAM123",
+    "price": 2500,
+    "stock": 50,
+    "category": "Ropa",
+    "thumbnails": [
+      "https://mi-ecommerce.com/imagenes/camiseta-negra1.jpg",
+      "https://mi-ecommerce.com/imagenes/camiseta-negra2.jpg"
+    ],
+    "status": true
+  },
+  {
+    "id": "1fde97f4-f3f2-48c9-94f7-a976b0396d00",
+    "title": "Camiseta Negra",
+    "description": "Camiseta de algodón 100% negra con estampado.",
+    "code": "CAM001",
+    "price": 2500,
+    "stock": 50,
+    "category": "Ropa",
+    "thumbnails": [
+      "https://example.com/camiseta-negra.jpg"
+    ],
+    "status": true
+  },
+  {
+    "id": "e831ecaa-a3d7-4532-9bdc-4f1186d18ec2",
+    "title": "Zapatillas Deportivas",
+    "description": "Zapatillas para running con suela amortiguada.",
+    "code": "ZAP003",
+    "price": 7500,
+    "stock": 20,
+    "category": "Calzado",
+    "thumbnails": [
+      "https://example.com/zapatillas.jpg"
+    ],
+    "status": true
+  },
+  {
+    "id": "f051d444-b393-4549-98cb-df3a8299def0",
+    "title": "Mochila Escolar",
+    "description": "Mochila con varios compartimentos y diseño ergonómico.",
+    "code": "MOC004",
+    "price": 3200,
+    "stock": 40,
+    "category": "Accesorios",
+    "thumbnails": [
+      "https://example.com/mochila.jpg"
+    ],
+    "status": true
+  }
+]
