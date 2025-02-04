@@ -1,4 +1,19 @@
 {
+  "name": "backend-ecommerce",
+  "version": "1.0.0",
+  "description": "Servidor en Node.js y Express para e-commerce",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "ecommerce",
+    "backend"
+  ],
+  "author": "DMS",
+  "license": "ISC",
   "dependencies": {
     "express": "^4.21.2",
     "uuid": "^11.0.5"
