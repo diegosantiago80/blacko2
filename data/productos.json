@@ -38,18 +38,5 @@
       "https://example.com/zapatillas.jpg"
     ],
     "status": true
-  },
-  {
-    "id": "f051d444-b393-4549-98cb-df3a8299def0",
-    "title": "Mochila Escolar",
-    "description": "Mochila con varios compartimentos y diseño ergonómico.",
-    "code": "MOC004",
-    "price": 3200,
-    "stock": 40,
-    "category": "Accesorios",
-    "thumbnails": [
-      "https://example.com/mochila.jpg"
-    ],
-    "status": true
   }
 ]

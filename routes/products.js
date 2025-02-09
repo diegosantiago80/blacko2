@@ -132,7 +132,8 @@ router.delete('/:pid', (req, res) => {
     }
 
     writeProducts(filteredProducts);
-    res.status(204).send();
+    res.status(200).json({ message: 'Producto eliminado exitosamente' });
 });
+
 
 module.exports = router;

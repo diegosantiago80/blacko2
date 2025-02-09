@@ -39,18 +39,20 @@ const writeCarts = (carts) => {
 
 
 router.post('/', (req, res) => {
+    const { products } = req.body;
     const carts = readCarts();
 
     const newCart = {
         id: uuidv4(), 
-        products: [],
+        products: Array.isArray(products) ? products : [],
     };
 
     carts.push(newCart);
     writeCarts(carts);
 
-    res.status(201).json(newCart);
+    res.status(201).json({ message: "Carrito creado exitosamente", cart: newCart });
 });
+
 
 router.get('/:cid', (req, res) => {
     const { cid } = req.params;

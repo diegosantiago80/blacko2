@@ -23,5 +23,22 @@
         "quantity": 3
       }
     ]
+  },
+  {
+    "id": "db080b08-b8fc-4906-b11d-931e77b482f3",
+    "products": []
+  },
+  {
+    "id": "fe046447-185c-4d5f-be2d-695c0ea1f002",
+    "products": [
+      {
+        "product": "123",
+        "quantity": 2
+      },
+      {
+        "product": "456",
+        "quantity": 1
+      }
+    ]
   }
 ]
