@@ -38,5 +38,15 @@
       "https://example.com/zapatillas.jpg"
     ],
     "status": true
+  },
+  {
+    "id": "afdb1e23-437e-4f89-af3c-64d1381535e4",
+    "title": "zapatos muy grandes ",
+    "price": "106000"
+  },
+  {
+    "id": "a4dcc200-2abb-4c28-9690-fc03f1d6ec59",
+    "title": "remera deportiva ",
+    "price": "85000"
   }
 ]

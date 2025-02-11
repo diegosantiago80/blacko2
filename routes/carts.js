@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid'); // asignacion de ID unicos 
+const { v4: uuidv4 } = require('uuid'); 
 const router = express.Router();
 
 const cartsFilePath = path.join(__dirname, '../data/carrito.json');
@@ -9,31 +9,54 @@ const productsFilePath = path.join(__dirname, '../data/productos.json');
 
 const readCarts = () => {
     try {
-        if (!fs.existsSync(cartsFilePath)) return [];
+        if (!fs.existsSync(cartsFilePath)) {
+            console.warn('Archivo carrito no encontrado. Creando un carrito vacio.');
+            return [];
+        }
+
         const data = fs.readFileSync(cartsFilePath, 'utf-8');
-        return JSON.parse(data || '[]');
+        if (!data.trim()) {
+            console.warn('Archivo carrito esta vacio. Retornando carrito vacio.');
+            return [];
+        }
+
+        return JSON.parse(data);
     } catch (error) {
-        console.error('Error leyendo carritos:', error);
+        console.error('Error leyendo carritos:', error.message);
         return [];
     }
 };
 
 const readProducts = () => {
     try {
-        if (!fs.existsSync(productsFilePath)) return [];
+        if (!fs.existsSync(productsFilePath)) {
+            console.warn('Archivo productos no encontrado. Creando un carrito vacio.');
+            return [];
+        }
+
         const data = fs.readFileSync(productsFilePath, 'utf-8');
-        return JSON.parse(data || '[]');
+        if (!data.trim()) {
+            console.warn('Archivo productos esta vacio. Retornando carrito vacio.');
+            return [];
+        }
+
+        return JSON.parse(data);
     } catch (error) {
-        console.error('Error leyendo productos:', error);
+        console.error('Error leyendo productos:', error.message);
         return [];
     }
 };
 
 const writeCarts = (carts) => {
     try {
+        if (!Array.isArray(carts)) {
+            throw new Error('El dato que intenta guardar en carrito no es valido.');
+        }
+
         fs.writeFileSync(cartsFilePath, JSON.stringify(carts, null, 2));
+        console.log('Carritos guardados correctamente');
     } catch (error) {
-        console.error('Error escribiendo carritos:', error);
+        console.error('Error guardando carritos:', error.message);
     }
 };
 
@@ -76,8 +99,9 @@ router.post('/:cid/product/:pid', (req, res) => {
     if (!cart) {
         return res.status(404).json({ error: 'Carrito no encontrado' });
     }
-
-    const productExists = products.find((p) => p.id === pid);
+    
+    
+    const productExists = products.find((p) => String(p.id) === String(pid));
     if (!productExists) {
         return res.status(404).json({ error: 'Producto no encontrado' });
     }
