@@ -1,0 +1,60 @@
+<h1>Detalles del Producto</h1>
+
+<div>
+    <h2>{{product.title}}</h2>
+    <p>{{product.description}}</p>
+    <p>Precio: ${{product.price}}</p>
+    <p>Categoría: {{product.category}}</p>
+    <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
+</div>
+
+<script>
+    let cartId = localStorage.getItem("cartId");
+
+    // Función para verificar o crear un carrito
+    async function checkOrCreateCart() {
+        if (!cartId) {
+            try {
+                // Realiza un POST para crear un carrito
+                const response = await fetch('/api/carts', { method: 'POST' });
+
+                if (response.ok) {
+                    const data = await response.json(); 
+                    cartId = data._id; 
+                    localStorage.setItem("cartId", cartId); // Almacena el ID en localStorage
+                    console.log("Carrito creado con ID:", cartId);
+                } else {
+                    console.error("Error al crear el carrito");
+                }
+            } catch (err) {
+                console.error("Error al crear el carrito:", err);
+            }
+        }
+    }
+
+    // Función para agregar productos al carrito
+    async function addToCart(productId) {
+        try {
+            await checkOrCreateCart(); // Verifica o crea el carrito antes de usarlo
+            const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (response.ok) {
+                alert("Producto agregado al carrito con éxito");
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message || "Intenta nuevamente"}`);
+            }
+        } catch (err) {
+            console.error("Error al agregar producto:", err);
+            alert("Ocurrió un problema al agregar el producto al carrito.");
+        }
+    }
+
+    // Verifica el carrito al cargar la página
+    checkOrCreateCart();
+</script>

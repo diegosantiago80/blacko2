@@ -1,11 +1,36 @@
 <h1>Lista de Productos</h1>
 
-{{#if products.length}}
-<ul>
+<div class="products-grid">
     {{#each products}}
-        <li>{{this.title}} - ${{this.price}}</li>
+    <div class="product-card">
+    <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image">
+    <h2>{{this.title}}</h2> 
+    <p>{{this.description}}</p>
+    <p>Precio: ${{this.price}}</p>
+    <p>Categoría: {{this.category}}</p>
+    <button onclick="viewProductDetail('{{this._id}}')" class="view-detail">Ver detalle</button> 
+</div>
+
+<script>
+    function viewProductDetail(productId) {
+        window.location.href = `/products/${productId}`; 
+    }
+</script>
+
     {{/each}}
-</ul>
-{{else}}
-<p>No hay productos disponibles</p>
-{{/if}}
+</div>
+
+
+<div class="pagination">
+    {{#if hasPrevPage}}
+    <a href="/products?page={{prevPage}}" class="page-link">Anterior</a>
+    {{/if}}
+
+    <span>Página {{currentPage}} de {{totalPages}}</span>
+
+    {{#if hasNextPage}}
+    <a href="/products?page={{nextPage}}" class="page-link">Siguiente</a>
+    {{/if}}
+</div>
+
+

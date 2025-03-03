@@ -1,89 +1,58 @@
 const express = require('express');
-const { engine } = require('express-handlebars');
+const mongoose = require('mongoose');
+require('dotenv').config();
 const path = require('path');
-const http = require('http');
-const { Server } = require('socket.io');
-const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const { engine } = require('express-handlebars');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
 
-const viewsRouter = require('./routes/views.router');
-app.use('/', viewsRouter);
-
-
-
-const readProducts = () => {
+// Conectar a MongoDB
+const connectDB = async () => {
     try {
-        const data = fs.readFileSync('./data/productos.json', 'utf-8');
-        return JSON.parse(data);
+        await mongoose.connect(process.env.MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        console.log('✅ Conectado a MongoDB Atlas');
     } catch (error) {
-        console.error("Error al leer productos.json:", error);
-        return [];
+        console.error('❌ Error al conectar a MongoDB:', error);
+        process.exit(1);
     }
 };
 
+connectDB();
 
-const writeProducts = (products) => {
-    try {
-        fs.writeFileSync('./data/productos.json', JSON.stringify(products, null, 2));
-    } catch (error) {
-        console.error("Error al escribir en productos.json:", error);
-    }
-};
-
-let products = readProducts();
-
-app.engine('handlebars', engine());
+// Configurar Handlebars
+app.engine('handlebars', engine({
+    runtimeOptions: {
+        allowProtoPropertiesByDefault: true,
+        allowProtoMethodsByDefault: true,
+    },
+}));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, 'views'));
 
-app.use(express.static('public'));
-app.use(express.json());
 
+// Middleware
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.urlencoded({ extended: true })); 
+
+// Rutas
 const productsRouter = require('./routes/products');
 const cartsRouter = require('./routes/carts');
+const viewsRouter = require('./routes/views.router'); 
 
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
+app.use('/', viewsRouter); 
 
-app.get('/realtimeproducts', (req, res) => {
-    res.render('realTimeProducts', { products });
+// Manejo de errores globales
+process.on('uncaughtException', (err) => {
+    console.error('❌ Error no capturado:', err);
 });
 
-io.on('connection', (socket) => {
-    console.log('🟢 Nuevo cliente conectado');
-
-    socket.on('nuevoProducto', (producto) => {
-        if (!producto.title || !producto.price) {
-            console.error("❌ Error: Producto invalido");
-            return;
-        }
-
-        producto.id = uuidv4();
-        products.push(producto);
-        writeProducts(products); 
-        io.emit('actualizarLista', products);
-    });
-
-    
-    socket.on('eliminarProducto', (id) => {
-        const index = products.findIndex((p) => p.id == id);
-        if (index !== -1) {
-            products.splice(index, 1);
-            writeProducts(products); 
-            io.emit('actualizarLista', products);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        console.log('🔴 Cliente desconectado');
-    });
-});
-
-const PORT = 8080;
-server.listen(PORT, () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor escuchando en http://localhost:${PORT}`);
 });

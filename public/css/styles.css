@@ -79,14 +79,52 @@ input {
     border-radius: 4px;
 }
 
-
 footer {
     background-color: blueviolet;
     color: white;
-    text-align: center;
-    padding: 10px;
-    position: fixed;
+    position: relative; /* Asegura que no cubra el contenido */
     bottom: 0;
     width: 100%;
-    font-size: 14px;
+    text-align: center;
+    padding: 10px 0;
 }
+
+
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        border: 1px solid #ddd;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .product-image {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .page-link {
+        padding: 10px 15px;
+        text-decoration: none;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        margin: 0 5px;
+    }
+
+    .view-detail {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+    }
