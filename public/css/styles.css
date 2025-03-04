@@ -82,7 +82,7 @@ input {
 footer {
     background-color: blueviolet;
     color: white;
-    position: relative; /* Asegura que no cubra el contenido */
+    position: relative; 
     bottom: 0;
     width: 100%;
     text-align: center;
@@ -128,3 +128,42 @@ footer {
         border: none;
         cursor: pointer;
     }
+
+    #cart-modal {
+        z-index: 1000; 
+    }
+    
+    #cart-products {
+        margin-top: 10px;
+        max-height: 200px; 
+        overflow-y: auto; 
+    }
+    
+
+
+
+button:hover {
+    background-color: #0056b3; 
+}
+
+
+#cart-products button {
+    margin: 7px 0; 
+}
+
+
+#cart-products div {
+    margin-bottom: 10px; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+    background-color: #f9f9f9; 
+}
+
+
+
+#cart-modal h3 {
+    font-size: 24px; 
+    margin-bottom: 20px;
+}
+

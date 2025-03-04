@@ -15,7 +15,7 @@ router.get('/view', async (req, res) => {
 });
 
 
-// Obtener productos con paginacion, orden y filtros
+// Obtiene productos con paginacion, orden y filtros
 router.get('/', async (req, res) => {
     try {
         const { page = 1, limit = 10, category, sort } = req.query; 
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
 });
 
 
-// Obtener un producto por ID
+// Obtiene un producto por ID
 router.get('/:pid', async (req, res) => {
     try {
         const product = await Product.findById(req.params.pid);
@@ -62,7 +62,7 @@ router.get('/:pid', async (req, res) => {
     }
 });
 
-// Crear un nuevo producto
+// Crea un nuevo producto
 router.post('/', async (req, res) => {
     try {
         const newProduct = new Product(req.body);
@@ -75,8 +75,7 @@ router.post('/', async (req, res) => {
 
 
 
-// Insertar multiples productos a la vez
-
+// Inserta multiples productos a la vez
 router.post('/bulk', async (req, res) => {
     try {
         const savedProducts = await Product.insertMany(req.body);
@@ -87,7 +86,7 @@ router.post('/bulk', async (req, res) => {
 });
 
 
-// Actualizar un producto por ID
+// Actualiza un producto por ID
 router.put('/:pid', async (req, res) => {
     try {
         const updatedProduct = await Product.findByIdAndUpdate(req.params.pid, req.body, { new: true });
@@ -100,7 +99,7 @@ router.put('/:pid', async (req, res) => {
     }
 });
 
-// Eliminar un producto por ID
+// Elimina un producto por ID
 router.delete('/:pid', async (req, res) => {
     try {
         const deletedProduct = await Product.findByIdAndDelete(req.params.pid);

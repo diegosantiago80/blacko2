@@ -3,6 +3,7 @@
 <div class="products-grid">
     {{#each products}}
     <div class="product-card">
+    <img src="/images/default.jpg" alt="Imagen del producto" class="product-image">
     <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image">
     <h2>{{this.title}}</h2> 
     <p>{{this.description}}</p>
@@ -20,6 +21,93 @@
     {{/each}}
 </div>
 
+<!-- icono del carrito -->
+<div style="position: fixed; 
+            top: 10px; 
+            right: 10px; 
+            cursor: pointer; 
+            font-size: 25px; 
+            padding: 10px; 
+            background-color: #edf2ee; 
+            border-radius: 40%; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            text-align: center;" 
+    onclick="toggleCartModal()">
+    🛒 <span id="cart-count" style="font-size: 18px; color: #007BFF;">0</span>
+</div>
+
+
+<!-- Modal del carrito -->
+<div id="cart-modal" style="display: none; position: fixed; top: 50px; right: 20px; background: white; border: 1px solid #ccc; padding: 20px; width: 300px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+    <h3>Carrito Actual</h3>
+    <div id="cart-products"></div>
+    <button onclick="clearCart()">Vaciar carrito</button>
+    <button onclick="toggleCartModal()">Cerrar</button>
+</div>
+
+<!--Formulario para filtros -->
+<form id="filterForm">
+    <label for="category">Categoría:</label>
+    <select id="category">
+        <option value="">Todas</option>
+        <option value="Electrónica">Electrónica</option>
+        <option value="Audio">Audio</option>
+        <option value="Iluminación">Iluminación</option>
+        <option value="Accesorios">Accesorios</option>
+        <option value="Deportes">Deportes</option>
+        <option value="Hogar">Hogar</option>
+        <option value="Muebles">Muebles</option>
+        <option value="Juguetes">Juguetes</option>
+        <option value="Tecnología">Tecnología</option>
+        <option value="Moda">Moda</option>
+        <option value="Música">Música</option>
+        <option value="Wearables">Wearables</option>
+        <option value="Hardware">Hardware</option>
+        <option value="Periféricos">Periféricos</option>
+        <option value="Gaming">Gaming</option>
+        <option value="Redes">Redes</option>
+        <option value="Almacenamiento">Almacenamiento</option>
+        <option value="Oficina">Oficina</option>
+
+    </select>
+
+    <label for="sort">Ordenar por precio:</label>
+    <select id="sort">
+        <option value="">Sin orden</option>
+        <option value="asc">Menor a Mayor</option>
+        <option value="desc">Mayor a Menor</option>
+    </select>
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<script>
+    
+    //Captura del evento del formulario y lo redirige con parametros en la URL
+    document.getElementById("filterForm").addEventListener("submit", function(event) {
+        event.preventDefault();  // Evita recargar la pagina
+
+        const category = document.getElementById("category").value;
+        const sort = document.getElementById("sort").value;
+
+        let queryParams = [];
+
+        if (category) queryParams.push(`category=${category}`);
+        if (sort) queryParams.push(`sort=${sort}`);
+
+        const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
+
+        window.location.href = `/products${queryString}`;  // Redirigir con los filtros aplicados
+    });
+
+    function addToCart(productId) {
+        fetch(`/api/carts/1/products/${productId}`, { method: "POST" })
+        .then(response => response.json())
+        .then(data => alert("Producto agregado"))
+        .catch(err => console.error(err));
+    }
+</script>
+
 
 <div class="pagination">
     {{#if hasPrevPage}}
@@ -33,4 +121,95 @@
     {{/if}}
 </div>
 
+<script>
+    let cartId = localStorage.getItem("cartId");
+
+    async function fetchCart() {
+        if (!cartId) {
+            console.error("No hay carrito asignado.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/carts/${cartId}`);
+            if (response.ok) {
+                const cart = await response.json();
+                renderCart(cart.products);
+            } else {
+                alert("Error al obtener el carrito.");
+            }
+        } catch (error) {
+            console.error("Error al obtener el carrito:", error);
+        }
+    }
+
+    function renderCart(products) {
+        const cartContainer = document.getElementById("cart-products");
+        const cartCount = document.getElementById("cart-count");
+
+        cartContainer.innerHTML = "";
+        cartCount.textContent = products.length; 
+
+        if (products.length === 0) {
+            cartContainer.innerHTML = "<p>El carrito está vacío.</p>";
+            return;
+        }
+
+        products.forEach(product => {
+            const productDiv = document.createElement("div");
+            productDiv.innerHTML = `
+                <p>${product.product.title} - Cantidad: ${product.quantity}</p>
+                <button onclick="removeProductFromCart('${product.product._id}')">Eliminar</button>
+            `;
+            cartContainer.appendChild(productDiv);
+        });
+    }
+
+    function toggleCartModal() {
+        const modal = document.getElementById("cart-modal");
+        modal.style.display = modal.style.display === "none" ? "block" : "none";
+        if (modal.style.display === "block") {
+            fetchCart(); 
+        }
+    }
+
+    async function removeProductFromCart(productId) {
+        try {
+            const response = await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "DELETE" });
+            if (response.ok) {
+                Swal.fire("Producto eliminado del carrito.");
+                fetchCart(); 
+            } else {
+                alert("Error al eliminar el producto.");
+            }
+        } catch (error) {
+            console.error("Error al eliminar el producto:", error);
+        }
+    }
+
+    async function clearCart() {
+        try {
+            const response = await fetch(`/api/carts/${cartId}/products`, { method: "DELETE" });
+            if (response.ok) {
+                Swal.fire("Carrito vaciado.");
+                fetchCart(); 
+            } else {
+                alert("Error al vaciar el carrito.");
+            }
+        } catch (error) {
+            console.error("Error al vaciar el carrito:", error);
+        }
+    }
+
+    // Inicializa el carrito al cargar la pagina
+    if (!cartId) {
+        fetch('/api/carts', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                cartId = data._id;
+                localStorage.setItem("cartId", cartId);
+                console.log("Carrito creado con ID:", cartId);
+            });
+    }
+</script>
 

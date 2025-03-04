@@ -3,13 +3,23 @@ const router = express.Router();
 const Product = require('../models/product');
 const Cart = require('../models/cart'); 
 
-router.get('/products', async (req, res) => {
+router.get("/products", async (req, res) => {
     try {
-        const { page = 1, limit = 10 } = req.query;
-        const options = { page: parseInt(page), limit: parseInt(limit) };
-        const products = await Product.paginate({}, options);
+        const { category, sort, page = 1, limit = 10 } = req.query;
+        
+        let query = {};
+        if (category) query.category = category;  // Filtra por categoria
+        
+        let options = {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: sort ? { price: sort === "asc" ? 1 : -1 } : {}, // Ordena por precio asc o desc
+            lean: true,  
+        };
 
-        res.render('home', {
+        const products = await Product.paginate(query, options);
+
+        res.render("home", {
             products: products.docs,
             hasPrevPage: products.hasPrevPage,
             hasNextPage: products.hasNextPage,
@@ -17,12 +27,13 @@ router.get('/products', async (req, res) => {
             nextPage: products.nextPage,
             currentPage: products.page,
             totalPages: products.totalPages,
+            selectedCategory: category,  
+            selectedSort: sort,
         });
     } catch (error) {
-        res.status(500).send('Error al obtener productos');
+        res.status(500).send("Error al obtener productos");
     }
 });
-
 
 
 router.get('/products/:pid', async (req, res) => {
