@@ -1,8 +1,151 @@
-<h1>Carrito</h1>
-{{#each cart.products}}
-    <div>
-        <h2>{{this.product.title}}</h2>
-        <p>Precio: ${{this.product.price}}</p>
-        <p>Cantidad: {{this.quantity}}</p>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Gestión de Carritos</h1>
+
+        <a href="/products" class="btn btn-success">
+            ← Seguir comprando
+        </a>
     </div>
-{{/each}}
+
+
+
+    {{#if cart}}
+        {{!-- Visualización de un solo carrito --}}
+        <div class="card mb-4 shadow-sm border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">ID del Carrito: {{cart._id}}</h5>
+                <button
+                    type="button"
+                    class="btn btn-light btn-sm"
+                    onclick="clearCart('{{cart._id}}')">
+                    Vaciar Carrito
+                </button>
+            </div>
+
+            <div class="card-body">
+                {{#if cart.products.length}}
+                    {{#each cart.products}}
+                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                            <div>
+                                {{#if this.product}}
+                                    <h4 class="mb-1">{{this.product.title}}</h4>
+                                    <p class="mb-0 text-muted">
+                                        Precio: ${{this.product.price}} |
+                                        Cantidad: {{this.quantity}}
+                                    </p>
+                                {{else}}
+                                    <p class="text-danger mb-0">Producto no disponible</p>
+                                {{/if}}
+                            </div>
+
+                            {{#if this.product}}
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="removeItem('{{../cart._id}}', '{{this.product._id}}')">
+                                    Eliminar
+                                </button>
+                            {{/if}}
+                        </div>
+                    {{/each}}
+                {{else}}
+                    <p class="text-center text-muted">Este carrito no tiene productos.</p>
+                {{/if}}
+            </div>
+        </div>
+
+    {{else if carts}}
+        {{!-- Visualización de todos los carritos --}}
+        {{#each carts}}
+            <div class="card mb-5 shadow-sm border-dark">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Carrito ID: {{this._id}}</h5>
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        onclick="clearCart('{{this._id}}')">
+                        Vaciar Carrito
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    {{#if this.products.length}}
+                        {{#each this.products}}
+                            <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                <div>
+                                    {{#if this.product}}
+                                        <h5 class="mb-0">{{this.product.title}}</h5>
+                                        <small class="text-muted">
+                                            Precio: ${{this.product.price}} |
+                                            Cantidad: {{this.quantity}}
+                                        </small>
+                                    {{else}}
+                                        <small class="text-danger">Producto no disponible</small>
+                                    {{/if}}
+                                </div>
+
+                                {{#if this.product}}
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-link text-danger"
+                                        onclick="removeItem('{{../_id}}', '{{this.product._id}}')">
+                                        Quitar
+                                    </button>
+                                {{/if}}
+                            </div>
+                        {{/each}}
+                    {{else}}
+                        <p class="text-center text-muted my-2">Este carrito está vacío</p>
+                    {{/if}}
+                </div>
+            </div>
+        {{/each}}
+
+    {{else}}
+        <div class="alert alert-info text-center">
+            No hay carritos para mostrar
+        </div>
+    {{/if}}
+</div>
+
+<script>
+async function removeItem(cartId, productId) {
+    if (!confirm('¿Deseas eliminar este producto del carrito?')) return;
+
+    try {
+        const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            const errorData = await response.json();
+            alert('Error: ' + (errorData.error || 'No se pudo eliminar'));
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión con el servidor');
+    }
+}
+
+async function clearCart(cartId) {
+    if (!confirm('¿Estás seguro de que deseas vaciar el carrito?')) return;
+
+    try {
+        const response = await fetch(`/api/carts/${cartId}/products`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            location.reload();
+        } else {
+            const errorData = await response.json();
+            alert('Error: ' + (errorData.error || 'No se pudo vaciar'));
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Error de conexión con el servidor');
+    }
+}
+</script>

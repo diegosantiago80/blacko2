@@ -1,80 +1,78 @@
-<h1>Detalles del Producto</h1>
+<div class="product-container">
+    <div class="product-image-section">
+        {{#if product.thumbnails.[0]}}
+            <img src="{{product.thumbnails.[0]}}" alt="{{product.title}}" class="detail-image">
+        {{else}}
+            <img src="/images/default.jpg" alt="Imagen no disponible" class="detail-image">
+        {{/if}}
+    </div>
 
-<div>
-    <h2>{{product.title}}</h2>
-    <p>{{product.description}}</p>
-    <p>Precio: ${{product.price}}</p>
-    <p>Categoría: {{product.category}}</p>
-    <img src="/images/default.jpg" alt="Imagen del producto" class="product-image" width="350" height="350">
-    <button onclick="addToCart('{{product._id}}')">Agregar al carrito</button>
+    <div class="product-info-section">
+        <h1>{{product.title}}</h1>
+        <hr>
+        <p class="description">{{product.description}}</p>
+        <p class="category">Categoría: <strong>{{product.category}}</strong></p>
+        <p class="stock">Stock disponible: {{product.stock}}</p>
+        <p class="price">Precio: ${{product.price}}</p>
+
+        <div class="actions">
+            <button onclick="addToCart('{{product._id}}')" class="btn-add">Agregar al Carrito</button>
+            <button onclick="window.location.href='/products'" class="btn-back">Volver a la tienda</button>
+        </div>
+    </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let cartId = localStorage.getItem("cartId");
-
-    async function checkOrCreateCart() {
-        if (!cartId) {
-            try {
-                const response = await fetch('/api/carts', { method: 'POST' });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    cartId = data._id;
-                    localStorage.setItem("cartId", cartId);
-                    console.log("Carrito creado con ID:", cartId);
-                } else {
-                    console.error("Error al crear el carrito");
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al crear el carrito.',
-                    });
-                }
-            } catch (err) {
-                console.error("Error al crear el carrito:", err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Ocurrió un error al crear el carrito.',
-                });
+    let cartId = null;
+    async function initSession() {
+        try {
+            const response = await fetch('/api/sessions/current');
+            if (response.ok) {
+                const data = await response.json();
+                cartId = data.payload.cart._id || data.payload.cart;
+                console.log("Sesión activa en detalle. Carrito:", cartId);
+            } else {
+                console.warn("Usuario no logueado. El carrito no funcionará.");
             }
+        } catch (error) {
+            console.error("Error al obtener sesión:", error);
         }
     }
 
+    // Función para agregar este producto específico al carrito real
     async function addToCart(productId) {
+        if (!cartId) {
+            alert("Debes iniciar sesión para agregar productos al carrito.");
+            window.location.href = '/login';
+            return;
+        }
+
         try {
-            await checkOrCreateCart();
-            const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+            const response = await fetch(`/api/carts/${cartId}/products/${productId}`, { 
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' }
             });
 
             if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Producto agregado!',
-                    text: 'El producto se ha agregado al carrito con éxito.',
-                });
+                alert("¡Producto añadido con éxito!");
             } else {
-                const errorData = await response.json();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: errorData.message || "Intenta nuevamente",
-                });
+                const err = await response.json();
+                alert("Error: " + (err.error || "No se pudo agregar el producto"));
             }
-        } catch (err) {
-            console.error("Error al agregar producto:", err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Ocurrió un problema al agregar el producto al carrito.',
-            });
+        } catch (error) {
+            console.error("Error en la petición:", error);
+            alert("Error de conexión al agregar al carrito.");
         }
     }
 
-    checkOrCreateCart();
+    initSession();
 </script>
+
+<style>
+    .product-container { display: flex; gap: 40px; padding: 20px; max-width: 900px; margin: auto; }
+    .detail-image { width: 100%; max-width: 400px; border-radius: 8px; }
+    .price { font-size: 24px; color: #28a745; font-weight: bold; }
+    .btn-add { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    .btn-back { background-color: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-left: 10px; }
+    .btn-add:hover { background-color: #0056b3; }
+</style>

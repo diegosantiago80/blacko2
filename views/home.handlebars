@@ -1,77 +1,61 @@
+<nav style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background-color: #343a40; color: white; margin-bottom: 20px;">
+    <div>
+        <strong style="font-size: 1.2rem;">Black@ E-Commerce</strong>
+    </div>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <span id="user-display" style="font-style: italic; color: #ffc107;">Cargando usuario...</span>
+        <a href="/api/sessions/logout" style="text-decoration: none; color: white; background-color: #dc3545; padding: 6px 12px; border-radius: 4px; font-size: 0.9rem;">Cerrar Sesión</a>
+    </div>
+</nav>
+
 <h1>Lista de Productos</h1>
 
 <div class="products-grid">
     {{#each products}}
     <div class="product-card">
-    <img src="/images/default.jpg" alt="Imagen del producto" class="product-image">
-    <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image">
-    <h2>{{this.title}}</h2> 
-    <p>{{this.description}}</p>
-    <p>Precio: ${{this.price}}</p>
-    <p>Categoría: {{this.category}}</p>
-    <button onclick="viewProductDetail('{{this._id}}')" class="view-detail">Ver detalle</button> 
-</div>
-
-<script>
-    function viewProductDetail(productId) {
-        window.location.href = `/products/${productId}`; 
-    }
-</script>
-
+        {{#if this.thumbnails.[0]}}
+            <img src="{{this.thumbnails.[0]}}" alt="{{this.title}}" class="product-image">
+        {{else}}
+            <img src="/images/default.jpg" alt="Imagen por defecto" class="product-image">
+        {{/if}}
+        
+        <h2>{{this.title}}</h2> 
+        <p>{{this.description}}</p>
+        <p>Precio: ${{this.price}}</p>
+        <p>Categoría: {{this.category}}</p>
+        
+        <div class="actions">
+            <button onclick="viewProductDetail('{{this._id}}')" class="view-detail">Ver detalle</button> 
+            <button onclick="addToCart('{{this._id}}')" class="add-to-cart">Agregar al carrito</button>
+        </div>
+    </div>
     {{/each}}
 </div>
 
-<!-- icono del carrito -->
-<div style="position: fixed; 
-            top: 10px; 
-            right: 10px; 
-            cursor: pointer; 
-            font-size: 25px; 
-            padding: 10px; 
-            background-color: #edf2ee; 
-            border-radius: 40%; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
-            text-align: center;" 
-    onclick="toggleCartModal()">
+<div style="position: fixed; top: 70px; right: 10px; cursor: pointer; font-size: 25px; padding: 10px; background-color: #edf2ee; border-radius: 40%; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); text-align: center; z-index: 999;" 
+     onclick="toggleCartModal()">
     🛒 <span id="cart-count" style="font-size: 18px; color: #007BFF;">0</span>
 </div>
 
-
-<!-- Modal del carrito -->
-<div id="cart-modal" style="display: none; position: fixed; top: 50px; right: 20px; background: white; border: 1px solid #ccc; padding: 20px; width: 300px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-    <h3>Carrito Actual</h3>
-    <div id="cart-products"></div>
-    <button onclick="clearCart()">Vaciar carrito</button>
-    <button onclick="toggleCartModal()">Cerrar</button>
+<div id="cart-modal" style="display: none; position: fixed; top: 120px; right: 20px; background: white; border: 1px solid #ccc; padding: 20px; width: 320px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000;">
+    <h3>Mi Carrito</h3>
+    <div id="cart-products" style="max-height: 300px; overflow-y: auto; margin-bottom: 10px;"></div>
+    <div style="display: flex; gap: 10px;">
+        <button onclick="window.location.href='/cart'">Ver todo</button>
+        <button onclick="toggleCartModal()">Cerrar</button>
+    </div>
 </div>
 
-<!--Formulario para filtros -->
-<form id="filterForm">
+<form id="filterForm" style="margin: 20px 0;">
     <label for="category">Categoría:</label>
     <select id="category">
         <option value="">Todas</option>
         <option value="Electrónica">Electrónica</option>
         <option value="Audio">Audio</option>
-        <option value="Iluminación">Iluminación</option>
-        <option value="Accesorios">Accesorios</option>
-        <option value="Deportes">Deportes</option>
         <option value="Hogar">Hogar</option>
-        <option value="Muebles">Muebles</option>
-        <option value="Juguetes">Juguetes</option>
-        <option value="Tecnología">Tecnología</option>
-        <option value="Moda">Moda</option>
-        <option value="Música">Música</option>
-        <option value="Wearables">Wearables</option>
-        <option value="Hardware">Hardware</option>
-        <option value="Periféricos">Periféricos</option>
-        <option value="Gaming">Gaming</option>
-        <option value="Redes">Redes</option>
-        <option value="Almacenamiento">Almacenamiento</option>
-        <option value="Oficina">Oficina</option>
-
     </select>
 
-    <label for="sort">Ordenar por precio:</label>
+    <label for="sort">Precio:</label>
     <select id="sort">
         <option value="">Sin orden</option>
         <option value="asc">Menor a Mayor</option>
@@ -81,135 +65,103 @@
     <button type="submit">Filtrar</button>
 </form>
 
-<script>
-    
-    //Captura del evento del formulario y lo redirige con parametros en la URL
-    document.getElementById("filterForm").addEventListener("submit", function(event) {
-        event.preventDefault();  // Evita recargar la pagina
-
-        const category = document.getElementById("category").value;
-        const sort = document.getElementById("sort").value;
-
-        let queryParams = [];
-
-        if (category) queryParams.push(`category=${category}`);
-        if (sort) queryParams.push(`sort=${sort}`);
-
-        const queryString = queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
-
-        window.location.href = `/products${queryString}`;  // Redirigir con los filtros aplicados
-    });
-
-    function addToCart(productId) {
-        fetch(`/api/carts/1/products/${productId}`, { method: "POST" })
-        .then(response => response.json())
-        .then(data => alert("Producto agregado"))
-        .catch(err => console.error(err));
-    }
-</script>
-
-
 <div class="pagination">
     {{#if hasPrevPage}}
     <a href="/products?page={{prevPage}}" class="page-link">Anterior</a>
     {{/if}}
-
     <span>Página {{currentPage}} de {{totalPages}}</span>
-
     {{#if hasNextPage}}
     <a href="/products?page={{nextPage}}" class="page-link">Siguiente</a>
     {{/if}}
 </div>
 
 <script>
-    let cartId = localStorage.getItem("cartId");
+    let cartId = null;
 
-    async function fetchCart() {
-        if (!cartId) {
-            console.error("No hay carrito asignado.");
-            return;
-        }
-
+    async function initSession() {
         try {
-            const response = await fetch(`/api/carts/${cartId}`);
+            const response = await fetch('/api/sessions/current');
             if (response.ok) {
-                const cart = await response.json();
-                renderCart(cart.products);
+                const data = await response.json();
+                
+                document.getElementById("user-display").textContent = `Usuario: ${data.payload.email}`;
+                
+                cartId = data.payload.cart._id || data.payload.cart; 
+                console.log("Sesión activa. Carrito ID:", cartId);
+                updateCartBadge();
             } else {
-                alert("Error al obtener el carrito.");
+               
+                window.location.replace('/login');
             }
         } catch (error) {
-            console.error("Error al obtener el carrito:", error);
+            console.error("Error de sesión:", error);
         }
     }
 
-    function renderCart(products) {
-        const cartContainer = document.getElementById("cart-products");
-        const cartCount = document.getElementById("cart-count");
+    function viewProductDetail(productId) {
+        window.location.href = `/products/${productId}`; 
+    }
 
-        cartContainer.innerHTML = "";
-        cartCount.textContent = products.length; 
+    async function addToCart(productId) {
+        if (!cartId) return alert("Debes iniciar sesión");
 
+        try {
+            const response = await fetch(`/api/carts/${cartId}/products/${productId}`, { method: "POST" });
+            if (response.ok) {
+                updateCartBadge();
+                alert("Agregado al carrito");
+            }
+        } catch (error) {
+            console.error("Error al agregar:", error);
+        }
+    }
+
+    async function updateCartBadge() {
+        if (!cartId) return;
+        try {
+            const response = await fetch(`/api/carts/${cartId}`);
+            if (response.ok) {
+                const data = await response.json();
+                const products = data.products || [];
+                document.getElementById("cart-count").textContent = products.length;
+                renderCartModal(products);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function renderCartModal(products) {
+        const container = document.getElementById("cart-products");
+        container.innerHTML = "";
         if (products.length === 0) {
-            cartContainer.innerHTML = "<p>El carrito está vacío.</p>";
+            container.innerHTML = "<p>Vacío</p>";
             return;
         }
-
-        products.forEach(product => {
-            const productDiv = document.createElement("div");
-            productDiv.innerHTML = `
-                <p>${product.product.title} - Cantidad: ${product.quantity}</p>
-                <button onclick="removeProductFromCart('${product.product._id}')">Eliminar</button>
-            `;
-            cartContainer.appendChild(productDiv);
+        products.forEach(item => {
+            const div = document.createElement("div");
+            div.style.borderBottom = "1px solid #eee";
+            div.style.padding = "5px 0";
+            div.innerHTML = `<p style="margin:0; font-size: 0.9rem;">${item.product.title} (x${item.quantity})</p>`;
+            container.appendChild(div);
         });
     }
 
     function toggleCartModal() {
         const modal = document.getElementById("cart-modal");
         modal.style.display = modal.style.display === "none" ? "block" : "none";
-        if (modal.style.display === "block") {
-            fetchCart(); 
-        }
+        if (modal.style.display === "block") updateCartBadge();
     }
 
-    async function removeProductFromCart(productId) {
-        try {
-            const response = await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "DELETE" });
-            if (response.ok) {
-                Swal.fire("Producto eliminado del carrito.");
-                fetchCart(); 
-            } else {
-                alert("Error al eliminar el producto.");
-            }
-        } catch (error) {
-            console.error("Error al eliminar el producto:", error);
-        }
-    }
+    document.getElementById("filterForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const category = document.getElementById("category").value;
+        const sort = document.getElementById("sort").value;
+        let queryParams = [];
+        if (category) queryParams.push(`category=${category}`);
+        if (sort) queryParams.push(`sort=${sort}`);
+        window.location.href = `/products${queryParams.length ? '?' + queryParams.join("&") : ""}`;
+    });
 
-    async function clearCart() {
-        try {
-            const response = await fetch(`/api/carts/${cartId}/products`, { method: "DELETE" });
-            if (response.ok) {
-                Swal.fire("Carrito vaciado.");
-                fetchCart(); 
-            } else {
-                alert("Error al vaciar el carrito.");
-            }
-        } catch (error) {
-            console.error("Error al vaciar el carrito:", error);
-        }
-    }
-
-    // Inicializa el carrito al cargar la pagina
-    if (!cartId) {
-        fetch('/api/carts', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                cartId = data._id;
-                localStorage.setItem("cartId", cartId);
-                console.log("Carrito creado con ID:", cartId);
-            });
-    }
+    initSession();
 </script>
-
